@@ -7,28 +7,61 @@ public class Manager : MonoBehaviour
     public Ball ball;
     public GameObject player1;
     public GameObject player2;
+    public int p1Score;
+    public int p2Score;
+    public int lastWinner;//This tracks who the previous winner is,
+                          //and should be either 1 for player 1 or 2 for player 2
 
     private void Start()
     {
+        lastWinner = 1;
+        p1Score = 0;
+        p2Score = 0;
         StartRound();
+        Transform ballTrans = transform.Find("Ball");
+        ball = ballTrans.GetComponent<Ball>();
+
     }
 
     private void StartRound()
     {
         // Determine who lost the last round
-        bool player1Lost = false/* Your logic to determine if player 1 lost */;
-        bool player2Lost = true/* Your logic to determine if player 2 lost */;
 
-        if (player1Lost)
+
+        if (lastWinner==1)
         {
             ball.transform.position = player1.transform.position;
         }
-        else if (player2Lost)
+        else
         {
             ball.transform.position = player2.transform.position;
         }
 
         ball.StartRound();
+    }
+
+    public void incrementScore(int winner)
+    {
+        
+        if (winner == 1)
+        {
+            p1Score++;
+            Debug.Log("Player 1 scores!");
+        }
+        else
+        {
+            p2Score++;
+            Debug.Log("Player 2 scores!");
+        }
+        Debug.Log($"Current score: {p1Score} to {p2Score}");
+        ball.transform.position = new Vector3(0, 0, 0);
+
+        if (p1Score >= 11 || p2Score >= 11)
+        {
+            //Win state!
+            
+        }
+        
     }
 }
 

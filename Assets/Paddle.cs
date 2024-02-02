@@ -19,7 +19,7 @@ public class Paddle : MonoBehaviour
     void FixedUpdate()
     {
         float vValue = Input.GetAxis("Vertical");
-        Debug.Log($"vValue: {vValue}");
+        // Debug.Log($"vValue: {vValue}");
 
         Vector3 force = Vector3.forward * vValue;//(horizontalValue * ups * Time.deltaTime);
 
@@ -30,14 +30,14 @@ public class Paddle : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        Debug.Log($"We hit {other.gameObject.name}");
+        // Debug.Log($"We hit {other.gameObject.name}");
 
         BoxCollider bc = GetComponent<BoxCollider>();
         Bounds bounds = bc.bounds;
         float maxX = bounds.max.x;
         float minX = bounds.min.x;
         
-        Debug.Log($"x pos of ball is ");
+        // Debug.Log($"x pos of ball is ");
         
         Quaternion rotation = Quaternion.Euler(0f, 0f, -60f);
         Vector3 bounceDir = rotation * Vector3.up;

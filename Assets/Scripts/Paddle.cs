@@ -12,6 +12,7 @@ public class Paddle : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log("script is active for some reason???");
         _rb = GetComponent<Rigidbody>();
     }
 
@@ -31,6 +32,7 @@ public class Paddle : MonoBehaviour
     private void OnCollisionEnter(Collision other)
     {
         // Debug.Log($"We hit {other.gameObject.name}");
+        Debug.Log("why is this being called???");
 
         BoxCollider bc = GetComponent<BoxCollider>();
         Bounds bounds = bc.bounds;

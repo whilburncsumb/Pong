@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,13 +12,23 @@ public class Manager : MonoBehaviour
     public int p2Score;
     public int lastWinner;//This tracks who the previous winner is,
                           //and should be either 1 for player 1 or 2 for player 2
-
+    public float paddleSpeed;
+    
     private void Start()
     {
         lastWinner = 1;
         p1Score = 0;
         p2Score = 0;
         StartRound();
+    }
+
+    private void FixedUpdate()
+    {
+        float input1 = Input.GetAxis("Vertical");
+        float input2 = Input.GetAxis("Horizontal");
+
+        // Move the paddle based on input
+        MovePaddle(input1,input2);
     }
 
     private void StartRound()
@@ -32,6 +43,15 @@ public class Manager : MonoBehaviour
         }
 
         ball.StartRound(lastWinner);
+    }
+
+    private void MovePaddle(float input1, float input2)
+    {
+        // Debug.Log($"moving paddle by {input1} and {input2}");
+        Vector3 moveDirection1 = new Vector3(0f, input1, 0f);
+        Vector3 moveDirection2 = new Vector3(0f, input2, 0f);
+        player1.transform.Translate(moveDirection1 * (paddleSpeed * Time.deltaTime));
+        player2.transform.Translate(moveDirection2 * (paddleSpeed * Time.deltaTime));
     }
 
     public void incrementScore(int winner)

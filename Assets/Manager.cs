@@ -18,16 +18,10 @@ public class Manager : MonoBehaviour
         p1Score = 0;
         p2Score = 0;
         StartRound();
-        Transform ballTrans = transform.Find("Ball");
-        ball = ballTrans.GetComponent<Ball>();
-
     }
 
     private void StartRound()
     {
-        // Determine who lost the last round
-
-
         if (lastWinner==1)
         {
             ball.transform.position = player1.transform.position;
@@ -37,29 +31,41 @@ public class Manager : MonoBehaviour
             ball.transform.position = player2.transform.position;
         }
 
-        ball.StartRound();
+        ball.StartRound(lastWinner);
     }
 
     public void incrementScore(int winner)
     {
-        
         if (winner == 1)
         {
             p1Score++;
+            lastWinner = 1;
             Debug.Log("Player 1 scores!");
         }
         else
         {
             p2Score++;
+            lastWinner = 2;
             Debug.Log("Player 2 scores!");
         }
         Debug.Log($"Current score: {p1Score} to {p2Score}");
         ball.transform.position = new Vector3(0, 0, 0);
+        ball.StartRound(winner);
 
         if (p1Score >= 11 || p2Score >= 11)
         {
             //Win state!
-            
+            if (p1Score > p2Score)
+            {
+                Debug.Log("Player 1 Wins!");
+            }
+            else
+            {
+                Debug.Log("Player 2 Wins!");
+            }
+            Debug.Log("Reseting score...");
+            p1Score = 0;
+            p2Score = 0;
         }
         
     }

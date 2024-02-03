@@ -6,15 +6,16 @@ using Random = UnityEngine.Random;
 
 public class Ball : MonoBehaviour
 {
-    public float initialSpeed;
+    private const float initialSpeed = 15f;
     private float currentSpeed;
     private Vector3 direction;
     private Manager manager;
+    private Rigidbody _rigidbody;
 
     void Start()
     {
-        initialSpeed = 15f;
-        StartRound();
+        _rigidbody = GetComponent<Rigidbody>();
+        StartRound(1);
         manager = transform.parent.GetComponent<Manager>();
     }
 
@@ -26,10 +27,10 @@ public class Ball : MonoBehaviour
     void MoveBall()
     {
         // Calculate the new position based on the current velocity
-        Vector3 newPosition = transform.position + direction * currentSpeed * Time.deltaTime;
+        Vector3 newPosition = transform.position + direction * (currentSpeed * Time.deltaTime);
 
         // Move the ball using Rigidbody to handle collisions
-        GetComponent<Rigidbody>().MovePosition(newPosition);
+        _rigidbody.MovePosition(newPosition);
     }
 
 
@@ -38,10 +39,11 @@ public class Ball : MonoBehaviour
         if (collision.gameObject.CompareTag("Paddle"))
         {
             // Reverse the x direction and increase speed
-            direction = new Vector3(-direction.x,0, direction.z).normalized;
-            currentSpeed += 0.5f;
+            Debug.Log("bounce!");
+            direction = new Vector3(-direction.x,direction.y, direction.z).normalized;
+            currentSpeed += 0.2f;
         }
-        if (collision.gameObject.CompareTag("Wall"))
+        else if (collision.gameObject.CompareTag("Wall"))
         {
             // Reverse the y direction
             direction = new Vector3(direction.x,-direction.y, direction.z).normalized;
@@ -50,25 +52,39 @@ public class Ball : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        
-        
         if (other.CompareTag("Goal"))
-        {
-            manager.incrementScore(1);
-            // StartRound();
-        }
-        else if (other.CompareTag("Goal2"))
         {
             manager.incrementScore(2);
         }
+        else if (other.CompareTag("Goal2"))
+        {
+            manager.incrementScore(1);
+        }
     }
 
-    public void StartRound()
+    public void StartRound(int winner)
     {
-        
-        // Determine initial direction based on who lost the last round
-        direction = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f),0).normalized;
+        SetRandomDirection(winner);
         currentSpeed = initialSpeed;
+    }
+    
+    void SetRandomDirection(int winner)
+    {
+        Vector3 newDirection;
+        // if player 1 won, the ball should go right, otherwise, left
+        if (winner == 1)
+        {
+            newDirection = new Vector3(1f, 0f, 0f);
+        }
+        else
+        {
+            newDirection = new Vector3(-1f, 0f, 0f);
+        }
+        // randomly alter the starting direction in the range of 45 degrees either direction
+        float randomAngle = Random.Range(-45f, 45f);
+        newDirection = Quaternion.Euler(0f, 0f, randomAngle) * newDirection;
+        newDirection.Normalize();
+        direction = newDirection;
     }
 }
 

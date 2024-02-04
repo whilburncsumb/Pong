@@ -18,27 +18,30 @@ public class Ball : MonoBehaviour
     public AudioClip low;
     private AudioSource audioSource;
     public int lastPlayerToHit;
+    private Color color;
+    public Renderer _renderer;
+    public ParticleSystem fire;
+    public float particleRate;
 
     void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
-        StartRound(1);
-        lastPlayerToHit = 1;
         manager = transform.parent.GetComponent<Manager>();
         audioSource = GetComponent<AudioSource>();
+        lastPlayerToHit = 1;
+        StartRound(1);
     }
 
     void FixedUpdate()
     {
         MoveBall();
+
     }
 
     void MoveBall()
     {
-        // Calculate the new position based on the current velocity
+        //determine the new position of the ball based on velocity
         Vector3 newPosition = transform.position + direction * (currentSpeed * Time.deltaTime);
-
-        // Move the ball using Rigidbody to handle collisions
         _rigidbody.MovePosition(newPosition);
     }
 
@@ -64,7 +67,6 @@ public class Ball : MonoBehaviour
             // Reverse the x direction based on the calculated angle
             direction = new Vector3(Mathf.Cos(Mathf.Deg2Rad * angle), Mathf.Sin(Mathf.Deg2Rad * angle), direction.z).normalized;
             direction = new Vector3(-direction.x,direction.y, direction.z).normalized;
-            // Increase speed
             currentSpeed += speedIncrease;
 
             // play the high pitched sound
@@ -72,6 +74,13 @@ public class Ball : MonoBehaviour
             audioSource.Play();
             //tell the manager to shake the camera
             manager.TriggerShake(currentSpeed/initialSpeed);
+            //change the ball's material to be more red as it speeds up
+            color = Color.Lerp(Color.white,Color.red, (currentSpeed - initialSpeed)/15f);
+            _renderer.material.color = color;
+            //control the frequency of fire particle emissions
+            var emission = fire.emission;
+            particleRate = (currentSpeed - initialSpeed)* 10f;
+            emission.rateOverTimeMultiplier = particleRate;
             if (collision.gameObject.name == "leftPaddle")
             {
                 lastPlayerToHit = 1;
@@ -118,6 +127,11 @@ public class Ball : MonoBehaviour
     {
         SetRandomDirection(winner);
         currentSpeed = initialSpeed;
+        color = Color.white;
+        _renderer.material.color = color;
+        var emission = fire.emission;
+        particleRate = 0;
+        emission.rateOverTimeMultiplier = particleRate;
     }
     
     void SetRandomDirection(int winner)

@@ -2,17 +2,26 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = System.Random;
 
 public class Manager : MonoBehaviour
 {
     public Ball ball;
     public GameObject player1;
     public GameObject player2;
+    public GameObject mainCamera;
+    public GameObject powerup;
     public int p1Score;
     public int p2Score;
     public int lastWinner;//This tracks who the previous winner is,
                           //and should be either 1 for player 1 or 2 for player 2
     public float paddleSpeed;
+    public float paddleYMin;
+    public float paddleYMax;
+    public int remainingShakeFrames;
+    public float shakeIntensity;
+    private Vector3 cameraHomePosition;
+    public int powerupCountdown;
     
     private void Start()
     {
@@ -20,41 +29,76 @@ public class Manager : MonoBehaviour
         p1Score = 0;
         p2Score = 0;
         StartRound();
+        cameraHomePosition = mainCamera.transform.position;
+        remainingShakeFrames = 0;
+        shakeIntensity = 0;
+        powerupCountdown = 200;
     }
 
     private void FixedUpdate()
     {
         float input1 = Input.GetAxis("Vertical");
+        //ITs called the horizontal input but it controls the second paddle with up and down
         float input2 = Input.GetAxis("Horizontal");
-
-        // Move the paddle based on input
         MovePaddle(input1,input2);
+        if (remainingShakeFrames > 0)
+        {
+            Shake();
+        }
+        else
+        {
+            mainCamera.transform.position = cameraHomePosition;
+        }
+        //Decrease powerup countdown timer and spawn a powerup when it reaches 0
+        if (powerupCountdown > 0)
+        {
+            powerupCountdown--;
+        }
+        else if(powerupCountdown==0)
+        {
+            spawnPowerup();
+            powerupCountdown = -1;
+        }
+    }
+
+    private void spawnPowerup()
+    {
+        Instantiate(powerup, new Vector3(0f, 5f, 0f), Quaternion.identity);
     }
 
     private void StartRound()
     {
-        if (lastWinner==1)
-        {
-            ball.transform.position = player1.transform.position;
-        }
-        else
-        {
-            ball.transform.position = player2.transform.position;
-        }
-
         ball.StartRound(lastWinner);
+    }
+
+    private void Shake()
+    {
+        remainingShakeFrames--;
+        mainCamera.transform.position = cameraHomePosition + UnityEngine.Random.insideUnitSphere * 
+            (shakeIntensity * (float)0.5);
+    }
+    
+    public void TriggerShake(float intensity)
+    {
+        shakeIntensity = intensity;
+        remainingShakeFrames = (int)(8 * shakeIntensity);
+        Shake();
     }
 
     private void MovePaddle(float input1, float input2)
     {
-        // Debug.Log($"moving paddle by {input1} and {input2}");
-        Vector3 moveDirection1 = new Vector3(0f, input1, 0f);
-        Vector3 moveDirection2 = new Vector3(0f, input2, 0f);
-        player1.transform.Translate(moveDirection1 * (paddleSpeed * Time.deltaTime));
-        player2.transform.Translate(moveDirection2 * (paddleSpeed * Time.deltaTime));
+        Vector3 newPosition1 = new Vector3(0f, input1, 0f);
+        Vector3 newPosition2 = new Vector3(0f, input2, 0f);
+        newPosition1 = player1.transform.position + newPosition1 * (paddleSpeed * Time.deltaTime);
+        newPosition2 = player2.transform.position + newPosition2 * (paddleSpeed * Time.deltaTime);
+        //Make sure the paddles stay within bounds and dont go through walls
+        newPosition1.y = Math.Clamp(newPosition1.y, paddleYMin, paddleYMax);
+        newPosition2.y = Math.Clamp(newPosition2.y, paddleYMin, paddleYMax);
+        player1.transform.position = newPosition1;
+        player2.transform.position = newPosition2;
     }
 
-    public void incrementScore(int winner)
+    public void IncrementScore(int winner)
     {
         if (winner == 1)
         {

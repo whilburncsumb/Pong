@@ -8,6 +8,7 @@ TagManager:
   - Paddle
   - Goal
   - Goal2
+  - PowerUp
   layers:
   - Default
   - TransparentFX

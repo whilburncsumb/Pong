@@ -7,16 +7,25 @@ using Random = UnityEngine.Random;
 public class Ball : MonoBehaviour
 {
     private const float initialSpeed = 15f;
+    private const float speedIncrease = 5f;
     private float currentSpeed;
     private Vector3 direction;
     private Manager manager;
+    public Paddle player1;
+    public Paddle player2;
     private Rigidbody _rigidbody;
+    public AudioClip high;
+    public AudioClip low;
+    private AudioSource audioSource;
+    public int lastPlayerToHit;
 
     void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
         StartRound(1);
+        lastPlayerToHit = 1;
         manager = transform.parent.GetComponent<Manager>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void FixedUpdate()
@@ -36,17 +45,48 @@ public class Ball : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        // if (collision.gameObject.CompareTag("Paddle"))
+        // {
+        //     // Reverse the x direction and increase speed
+        //     direction = new Vector3(-direction.x,direction.y, direction.z).normalized;
+        //     currentSpeed += speedIncrease;
+        //     audioSource.clip = high;
+        //     audioSource.Play();
+        // }
         if (collision.gameObject.CompareTag("Paddle"))
         {
-            // Reverse the x direction and increase speed
-            Debug.Log("bounce!");
+            // Calculate the angle between the ball and paddle's xy positions
+            Vector3 ballPosition = transform.position;
+            Vector3 paddlePosition = collision.transform.position;
+
+            float angle = Mathf.Atan2(paddlePosition.y - ballPosition.y, paddlePosition.x - ballPosition.x) * Mathf.Rad2Deg;
+
+            // Reverse the x direction based on the calculated angle
+            direction = new Vector3(Mathf.Cos(Mathf.Deg2Rad * angle), Mathf.Sin(Mathf.Deg2Rad * angle), direction.z).normalized;
             direction = new Vector3(-direction.x,direction.y, direction.z).normalized;
-            currentSpeed += 0.2f;
+            // Increase speed
+            currentSpeed += speedIncrease;
+
+            // play the high pitched sound
+            audioSource.clip = high;
+            audioSource.Play();
+            //tell the manager to shake the camera
+            manager.TriggerShake(currentSpeed/initialSpeed);
+            if (collision.gameObject.name == "leftPaddle")
+            {
+                lastPlayerToHit = 1;
+            }
+            else
+            {
+                lastPlayerToHit = 2;
+            }
         }
         else if (collision.gameObject.CompareTag("Wall"))
         {
-            // Reverse the y direction
+            //reverse the y direction and play the low pitched sound
             direction = new Vector3(direction.x,-direction.y, direction.z).normalized;
+            audioSource.clip = low;
+            audioSource.Play();
         }
     }
 
@@ -54,11 +94,23 @@ public class Ball : MonoBehaviour
     {
         if (other.CompareTag("Goal"))
         {
-            manager.incrementScore(2);
+            manager.IncrementScore(2);
         }
         else if (other.CompareTag("Goal2"))
         {
-            manager.incrementScore(1);
+            manager.IncrementScore(1);
+        } else if (other.CompareTag("PowerUp"))
+        {
+            if (lastPlayerToHit == 1)
+            {
+                player1.powerUp();
+            }
+            else
+            {
+                player2.powerUp();
+            }
+            Destroy(other.gameObject);
+            manager.powerupCountdown = 500;
         }
     }
 

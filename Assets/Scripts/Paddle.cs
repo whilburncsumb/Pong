@@ -5,46 +5,47 @@ using UnityEngine;
 
 public class Paddle : MonoBehaviour
 {
-    public float ups = 50f;
+    public int timer;
 
-    private Rigidbody _rb;
+    public float speedMultiplier;
 
+    private float scaleSpeed;
+
+    private float minScale = 5f;
+
+    private float maxScale = 10f;
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("script is active for some reason???");
-        _rb = GetComponent<Rigidbody>();
+        timer = 0;
+        speedMultiplier = 1;
+        scaleSpeed = 3f;
     }
-
-    // Update is called once per frame
+    
     void FixedUpdate()
     {
-        float vValue = Input.GetAxis("Vertical");
-        // Debug.Log($"vValue: {vValue}");
-
-        Vector3 force = Vector3.forward * vValue;//(horizontalValue * ups * Time.deltaTime);
-
-        _rb.AddForce(force, ForceMode.Force);
-        // Transform t = GetComponent<Transform>();
-        // t.position += Vector3.right * (horizontalValue * ups * Time.deltaTime);
+        if (timer > 0)
+        {
+            transform.localScale += new Vector3(0f,scaleSpeed*Time.deltaTime, 0f);
+            if (transform.localScale.y > maxScale)
+            {
+                transform.localScale = new Vector3(1f,maxScale,1f);
+            }
+        }
+        else
+        {
+            transform.localScale -= new Vector3(0f,scaleSpeed*Time.deltaTime, 0f);
+            if (transform.localScale.y < minScale)
+            {
+                transform.localScale = new Vector3(1f,minScale,1f);
+            }
+        }
+        timer--;
     }
 
-    private void OnCollisionEnter(Collision other)
+    public void powerUp()
     {
-        // Debug.Log($"We hit {other.gameObject.name}");
-        Debug.Log("why is this being called???");
-
-        BoxCollider bc = GetComponent<BoxCollider>();
-        Bounds bounds = bc.bounds;
-        float maxX = bounds.max.x;
-        float minX = bounds.min.x;
-        
-        // Debug.Log($"x pos of ball is ");
-        
-        Quaternion rotation = Quaternion.Euler(0f, 0f, -60f);
-        Vector3 bounceDir = rotation * Vector3.up;
-        Rigidbody cb = other.rigidbody;
-        // cb.AddForce(new Vector3(1000f,1000f,0f),ForceMode.Force);
-        cb.AddForce(bounceDir * 1000, ForceMode.Force);
+        timer = 500;
+        speedMultiplier = 1.5f;
     }
 }

@@ -9,14 +9,16 @@ public class Ball : MonoBehaviour
     private const float initialSpeed = 15f;
     private const float speedIncrease = 5f;
     private float currentSpeed;
-    private Vector3 direction;
+    public Vector3 direction;
     private Manager manager;
     public Paddle player1;
     public Paddle player2;
     private Rigidbody _rigidbody;
     public AudioClip high;
     public AudioClip low;
+    public AudioClip powerUp;
     private AudioSource audioSource;
+    public AudioSource audioSource2;
     public int lastPlayerToHit;
     private Color color;
     public Renderer _renderer;
@@ -48,25 +50,15 @@ public class Ball : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        // if (collision.gameObject.CompareTag("Paddle"))
-        // {
-        //     // Reverse the x direction and increase speed
-        //     direction = new Vector3(-direction.x,direction.y, direction.z).normalized;
-        //     currentSpeed += speedIncrease;
-        //     audioSource.clip = high;
-        //     audioSource.Play();
-        // }
         if (collision.gameObject.CompareTag("Paddle"))
         {
-            // Calculate the angle between the ball and paddle's xy positions
+            //determine the new direction of the ball based on the difference in y position between the ball and paddle
             Vector3 ballPosition = transform.position;
             Vector3 paddlePosition = collision.transform.position;
-
-            float angle = Mathf.Atan2(paddlePosition.y - ballPosition.y, paddlePosition.x - ballPosition.x) * Mathf.Rad2Deg;
-
-            // Reverse the x direction based on the calculated angle
-            direction = new Vector3(Mathf.Cos(Mathf.Deg2Rad * angle), Mathf.Sin(Mathf.Deg2Rad * angle), direction.z).normalized;
-            direction = new Vector3(-direction.x,direction.y, direction.z).normalized;
+            //clamp the y vector to prevent the ball from going at extreme angles that make it take a long time to cross the field
+            float ydiff = Mathf.Clamp(ballPosition.y - paddlePosition.y,-.8f,.8f);
+            //reverse the x vector and apply the new y vector
+            direction = new Vector3(-direction.x,ydiff, direction.z).normalized;
             currentSpeed += speedIncrease;
 
             // play the high pitched sound
@@ -101,6 +93,7 @@ public class Ball : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        //Determine if the ball hit a goal or a powerup
         if (other.CompareTag("Goal"))
         {
             manager.IncrementScore(2);
@@ -108,7 +101,8 @@ public class Ball : MonoBehaviour
         else if (other.CompareTag("Goal2"))
         {
             manager.IncrementScore(1);
-        } else if (other.CompareTag("PowerUp"))
+        } 
+        else if (other.CompareTag("PowerUp"))
         {
             if (lastPlayerToHit == 1)
             {
@@ -118,6 +112,7 @@ public class Ball : MonoBehaviour
             {
                 player2.powerUp();
             }
+            audioSource2.Play();
             Destroy(other.gameObject);
             manager.powerupCountdown = 500;
         }

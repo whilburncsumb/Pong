@@ -104,13 +104,13 @@ public class Manager : MonoBehaviour
         {
             p1Score++;
             lastWinner = 1;
-            Debug.Log("Player 1 scores!");
+            Debug.Log("Left Paddle scores!");
         }
         else
         {
             p2Score++;
             lastWinner = 2;
-            Debug.Log("Player 2 scores!");
+            Debug.Log("Right Paddle scores!");
         }
         Debug.Log($"Current score: {p1Score} to {p2Score}");
         ball.transform.position = new Vector3(0, 0, 0);
@@ -121,11 +121,11 @@ public class Manager : MonoBehaviour
             //Win state!
             if (p1Score > p2Score)
             {
-                Debug.Log("Player 1 Wins!");
+                Debug.Log("Game Over, Left Paddle Wins!");
             }
             else
             {
-                Debug.Log("Player 2 Wins!");
+                Debug.Log("Game Over, Right Paddle Wins!");
             }
             Debug.Log("Reseting score...");
             p1Score = 0;

@@ -14,6 +14,9 @@ public class Paddle : MonoBehaviour
     private float minScale = 5f;
 
     private float maxScale = 10f;
+
+    public bool activeAI;
+    
     // Start is called before the first frame update
     void Start()
     {

@@ -177,6 +177,8 @@ MonoBehaviour:
   ball: {fileID: 1341644744}
   player1: {fileID: 849447550}
   player2: {fileID: 2100907428}
+  paddle1: {fileID: 849447557}
+  paddle2: {fileID: 2100907435}
   mainCamera: {fileID: 963194225}
   powerup: {fileID: 5687041325766969699, guid: 3c9668d199c3742ecabc30d213f15e9a, type: 3}
   p1Score: 0
@@ -188,6 +190,7 @@ MonoBehaviour:
   remainingShakeFrames: 0
   shakeIntensity: 0
   powerupCountdown: 0
+  aiBuffer: 2
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -558,6 +561,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timer: 0
   speedMultiplier: 0
+  activeAI: 0
 --- !u!1 &915497579
 GameObject:
   m_ObjectHideFlags: 0
@@ -5768,6 +5772,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62c52bbce4b4b7240a3b745dd5901e49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  direction: {x: 0, y: 0, z: 0}
   player1: {fileID: 849447557}
   player2: {fileID: 2100907435}
   high: {fileID: 8300000, guid: 0d81cc7e5a572465cb14c4b3f600a14f, type: 3}
@@ -6442,6 +6447,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timer: 0
   speedMultiplier: 0
+  activeAI: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

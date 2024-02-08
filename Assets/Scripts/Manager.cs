@@ -9,6 +9,8 @@ public class Manager : MonoBehaviour
     public Ball ball;
     public GameObject player1;
     public GameObject player2;
+    public Paddle paddle1;
+    public Paddle paddle2;
     public GameObject mainCamera;
     public GameObject powerup;
     public int p1Score;
@@ -22,6 +24,7 @@ public class Manager : MonoBehaviour
     public float shakeIntensity;
     private Vector3 cameraHomePosition;
     public int powerupCountdown;
+    public float aiBuffer;
     
     private void Start()
     {
@@ -87,13 +90,47 @@ public class Manager : MonoBehaviour
 
     private void MovePaddle(float input1, float input2)
     {
-        Vector3 newPosition1 = new Vector3(0f, input1, 0f);
-        Vector3 newPosition2 = new Vector3(0f, input2, 0f);
-        newPosition1 = player1.transform.position + newPosition1 * (paddleSpeed * Time.deltaTime);
-        newPosition2 = player2.transform.position + newPosition2 * (paddleSpeed * Time.deltaTime);
-        //Make sure the paddles stay within bounds and dont go through walls
-        newPosition1.y = Math.Clamp(newPosition1.y, paddleYMin, paddleYMax);
-        newPosition2.y = Math.Clamp(newPosition2.y, paddleYMin, paddleYMax);
+        Vector3 newPosition1 = new Vector3(0f, 0f, 0f);
+        Vector3 newPosition2 = new Vector3(0f, 0f, 0f);
+        if (!paddle1.activeAI)//no ai
+        {
+            newPosition1 = new Vector3(0f, input1, 0f);
+            newPosition1 = player1.transform.position + newPosition1 * (paddleSpeed * Time.deltaTime);
+            //Make sure the paddles stay within bounds and dont go through walls
+            newPosition1.y = Math.Clamp(newPosition1.y, paddleYMin, paddleYMax);
+        }
+        else//ai
+        {
+            if (player1.transform.position.y < ball.transform.position.y-aiBuffer)
+            {
+               newPosition1 = new Vector3(0f, 1, 0f); 
+            }
+            else if (player1.transform.position.y > ball.transform.position.y+aiBuffer)
+            {
+                newPosition1 = new Vector3(0f, -1, 0f);
+            }
+            newPosition1 = player1.transform.position + newPosition1 * (paddleSpeed * Time.deltaTime);
+        }
+
+        if (!paddle2.activeAI)//no ai
+        {
+            newPosition2 = new Vector3(0f, input2, 0f);
+            newPosition2 = player2.transform.position + newPosition2 * (paddleSpeed * Time.deltaTime); 
+            newPosition2.y = Math.Clamp(newPosition2.y, paddleYMin, paddleYMax);
+        }
+        else
+        {
+            if (player2.transform.position.y < ball.transform.position.y-aiBuffer)
+            {
+                newPosition2 = new Vector3(0f, 1, 0f); 
+            }
+            else if (player2.transform.position.y > ball.transform.position.y+aiBuffer)
+            {
+                newPosition2 = new Vector3(0f, -1, 0f);
+            }
+            newPosition2 = player2.transform.position + newPosition2 * (paddleSpeed * Time.deltaTime);
+        }
+        //apply the transformations
         player1.transform.position = newPosition1;
         player2.transform.position = newPosition2;
     }

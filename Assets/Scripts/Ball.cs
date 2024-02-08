@@ -63,18 +63,18 @@ public class Ball : MonoBehaviour
             direction = new Vector3(-direction.x,ydiff, direction.z).normalized;
             currentSpeed += speedIncrease;
 
-            // choose a sound to play based on the speed
-            if (currentSpeed <= initialSpeed + speedIncrease)
+            switch (currentSpeed)
             {
-                audioSource.clip = blip3;
-            }
-            else if (currentSpeed <= initialSpeed + (speedIncrease * 3f))
-            {
-                audioSource.clip = blip2;
-            }
-            else
-            {
-                audioSource.clip = blip1;
+                // choose a sound to play based on the speed
+                case <= initialSpeed + speedIncrease:
+                    audioSource.clip = blip3;
+                    break;
+                case <= initialSpeed + (speedIncrease * 3f):
+                    audioSource.clip = blip2;
+                    break;
+                default:
+                    audioSource.clip = blip1;
+                    break;
             }
             audioSource.Play();
             
@@ -87,14 +87,7 @@ public class Ball : MonoBehaviour
             var emission = fire.emission;
             particleRate = (currentSpeed - initialSpeed)* 10f;
             emission.rateOverTimeMultiplier = particleRate;
-            if (collision.gameObject.name == "leftPaddle")
-            {
-                lastPlayerToHit = 1;
-            }
-            else
-            {
-                lastPlayerToHit = 2;
-            }
+            lastPlayerToHit = collision.gameObject.name == "leftPaddle" ? 1 : 2;
         }
         else if (collision.gameObject.CompareTag("Wall"))
         {
@@ -126,6 +119,13 @@ public class Ball : MonoBehaviour
             {
                 player2.powerUp();
             }
+            audioSource2.Play();
+            Destroy(other.gameObject);
+            manager.powerupCountdown = 500;
+        }
+        else if (other.CompareTag("PowerUp2"))
+        {
+            currentSpeed *= 2f;
             audioSource2.Play();
             Destroy(other.gameObject);
             manager.powerupCountdown = 500;

@@ -7,12 +7,11 @@ using Random = System.Random;
 public class Manager : MonoBehaviour
 {
     public Ball ball;
-    public GameObject player1;
-    public GameObject player2;
     public Paddle paddle1;
     public Paddle paddle2;
     public GameObject mainCamera;
     public GameObject powerup;
+    public GameObject powerup2;
     public int p1Score;
     public int p2Score;
     public int lastWinner;//This tracks who the previous winner is,
@@ -24,7 +23,6 @@ public class Manager : MonoBehaviour
     public float shakeIntensity;
     private Vector3 cameraHomePosition;
     public int powerupCountdown;
-    public float aiBuffer;
     
     private void Start()
     {
@@ -40,10 +38,12 @@ public class Manager : MonoBehaviour
 
     private void FixedUpdate()
     {
+        //Move the paddles
         float input1 = Input.GetAxis("Vertical");
         //ITs called the horizontal input but it controls the second paddle with up and down
         float input2 = Input.GetAxis("Horizontal");
-        MovePaddle(input1,input2);
+        MovePaddle(input1, paddle1);
+        MovePaddle(input2, paddle2);
         if (remainingShakeFrames > 0)
         {
             Shake();
@@ -67,6 +67,7 @@ public class Manager : MonoBehaviour
     private void spawnPowerup()
     {
         Instantiate(powerup, new Vector3(0f, 5f, 0f), Quaternion.identity);
+        Instantiate(powerup2, new Vector3(0f, -5f, 0f), Quaternion.identity);
     }
 
     private void StartRound()
@@ -88,51 +89,25 @@ public class Manager : MonoBehaviour
         Shake();
     }
 
-    private void MovePaddle(float input1, float input2)
+    private void MovePaddle(float input, Paddle paddle)
     {
-        Vector3 newPosition1 = new Vector3(0f, 0f, 0f);
-        Vector3 newPosition2 = new Vector3(0f, 0f, 0f);
-        if (!paddle1.activeAI)//no ai
+        Vector3 newPosition = new Vector3(0f, 0f, 0f);
+        if (!paddle.activeAI)//no ai
         {
-            newPosition1 = new Vector3(0f, input1, 0f);
-            newPosition1 = player1.transform.position + newPosition1 * (paddleSpeed * Time.deltaTime);
-            //Make sure the paddles stay within bounds and dont go through walls
-            newPosition1.y = Math.Clamp(newPosition1.y, paddleYMin, paddleYMax);
+            newPosition = new Vector3(0f, input, 0f);
+            newPosition = paddle.gameObject.transform.position + newPosition * (paddleSpeed * Time.deltaTime);
         }
         else//ai
         {
-            if (player1.transform.position.y < ball.transform.position.y-aiBuffer)
-            {
-               newPosition1 = new Vector3(0f, 1, 0f); 
-            }
-            else if (player1.transform.position.y > ball.transform.position.y+aiBuffer)
-            {
-                newPosition1 = new Vector3(0f, -1, 0f);
-            }
-            newPosition1 = player1.transform.position + newPosition1 * (paddleSpeed * Time.deltaTime);
+            float maxSpeed = (paddleSpeed * Time.deltaTime);
+            float yTransform = Mathf.Clamp(ball.transform.position.y - paddle.transform.position.y,-maxSpeed,maxSpeed);
+            newPosition = new Vector3(0f, yTransform, 0f); 
+            newPosition = paddle.transform.position + newPosition * (paddleSpeed * Time.deltaTime);
         }
-
-        if (!paddle2.activeAI)//no ai
-        {
-            newPosition2 = new Vector3(0f, input2, 0f);
-            newPosition2 = player2.transform.position + newPosition2 * (paddleSpeed * Time.deltaTime); 
-            newPosition2.y = Math.Clamp(newPosition2.y, paddleYMin, paddleYMax);
-        }
-        else
-        {
-            if (player2.transform.position.y < ball.transform.position.y-aiBuffer)
-            {
-                newPosition2 = new Vector3(0f, 1, 0f); 
-            }
-            else if (player2.transform.position.y > ball.transform.position.y+aiBuffer)
-            {
-                newPosition2 = new Vector3(0f, -1, 0f);
-            }
-            newPosition2 = player2.transform.position + newPosition2 * (paddleSpeed * Time.deltaTime);
-        }
+        //Make sure the paddles stay within bounds and dont go through walls
+        newPosition.y = Math.Clamp(newPosition.y, paddleYMin, paddleYMax);
         //apply the transformations
-        player1.transform.position = newPosition1;
-        player2.transform.position = newPosition2;
+        paddle.transform.position = newPosition;
     }
 
     public void IncrementScore(int winner)

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.35727853, g: 0.42009157, b: 0.50180465, a: 1}
+  m_IndirectSpecularColor: {r: 0.35727906, g: 0.4200927, b: 0.5018056, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5775,8 +5775,10 @@ MonoBehaviour:
   direction: {x: 0, y: 0, z: 0}
   player1: {fileID: 849447557}
   player2: {fileID: 2100907435}
-  high: {fileID: 8300000, guid: 0d81cc7e5a572465cb14c4b3f600a14f, type: 3}
-  low: {fileID: 8300000, guid: 1cbd5ea1c4fb44b6bae58965121b95bb, type: 3}
+  blip1: {fileID: 8300000, guid: 0d81cc7e5a572465cb14c4b3f600a14f, type: 3}
+  blip2: {fileID: 8300000, guid: 1cbd5ea1c4fb44b6bae58965121b95bb, type: 3}
+  blip3: {fileID: 8300000, guid: 7737201766236ec46aec3104bd846327, type: 3}
+  blip4: {fileID: 8300000, guid: 5faa24434d5c1e14ab14afec366be858, type: 3}
   powerUp: {fileID: 8300000, guid: 1508652703a9c4c26bafb9395cd282e6, type: 3}
   audioSource2: {fileID: 717040781}
   lastPlayerToHit: 0

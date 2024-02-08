@@ -14,8 +14,10 @@ public class Ball : MonoBehaviour
     public Paddle player1;
     public Paddle player2;
     private Rigidbody _rigidbody;
-    public AudioClip high;
-    public AudioClip low;
+    public AudioClip blip1;
+    public AudioClip blip2;
+    public AudioClip blip3;
+    public AudioClip blip4;
     public AudioClip powerUp;
     private AudioSource audioSource;
     public AudioSource audioSource2;
@@ -61,9 +63,21 @@ public class Ball : MonoBehaviour
             direction = new Vector3(-direction.x,ydiff, direction.z).normalized;
             currentSpeed += speedIncrease;
 
-            // play the high pitched sound
-            audioSource.clip = high;
+            // choose a sound to play based on the speed
+            if (currentSpeed <= initialSpeed + speedIncrease)
+            {
+                audioSource.clip = blip3;
+            }
+            else if (currentSpeed <= initialSpeed + (speedIncrease * 3f))
+            {
+                audioSource.clip = blip2;
+            }
+            else
+            {
+                audioSource.clip = blip1;
+            }
             audioSource.Play();
+            
             //tell the manager to shake the camera
             manager.TriggerShake(currentSpeed/initialSpeed);
             //change the ball's material to be more red as it speeds up
@@ -86,7 +100,7 @@ public class Ball : MonoBehaviour
         {
             //reverse the y direction and play the low pitched sound
             direction = new Vector3(direction.x,-direction.y, direction.z).normalized;
-            audioSource.clip = low;
+            audioSource.clip = blip4;
             audioSource.Play();
         }
     }

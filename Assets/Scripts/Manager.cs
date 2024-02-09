@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = System.Random;
+using TMPro;
 
 public class Manager : MonoBehaviour
 {
@@ -12,17 +12,23 @@ public class Manager : MonoBehaviour
     public GameObject mainCamera;
     public GameObject powerup;
     public GameObject powerup2;
+    public float paddleSpeed;
     public int p1Score;
     public int p2Score;
     public int lastWinner;//This tracks who the previous winner is,
                           //and should be either 1 for player 1 or 2 for player 2
-    public float paddleSpeed;
-    public float paddleYMin;
-    public float paddleYMax;
-    public int remainingShakeFrames;
-    public float shakeIntensity;
+                          
+    private float shakeDuration;
+    private float shakeIntensity;
+    private float shakeStartTime;
     private Vector3 cameraHomePosition;
+    
     public int powerupCountdown;
+    public TextMeshProUGUI p1Text;
+    public TextMeshProUGUI p2Text;
+    private float p1TextColor;
+    private float p2TextColor;
+    private int scoreThreshold = 11;//score needed to win
     
     private void Start()
     {
@@ -31,27 +37,74 @@ public class Manager : MonoBehaviour
         p2Score = 0;
         StartRound();
         cameraHomePosition = mainCamera.transform.position;
-        remainingShakeFrames = 0;
         shakeIntensity = 0;
         powerupCountdown = 200;
+        setGuiText(p1Text,0);
+        setGuiText(p2Text,0);
+        p1TextColor = 0;
+        p2TextColor = 0;
     }
 
     private void FixedUpdate()
     {
         //Move the paddles
         float input1 = Input.GetAxis("Vertical");
-        //ITs called the horizontal input but it controls the second paddle with up and down
+        //Its called the horizontal input but it controls the second paddle with up and down
         float input2 = Input.GetAxis("Horizontal");
         MovePaddle(input1, paddle1);
         MovePaddle(input2, paddle2);
-        if (remainingShakeFrames > 0)
+        
+        Shake(); //shake the screen if there was a paddle impact
+        setTextColors(); //cycle the text colors
+        spawnPowerup(); //spawn powerups after a certain time
+    }
+
+    private void setTextColors()
+    {
+        float p1Speed = ((float)p1Score / scoreThreshold);
+        float p2Speed = ((float)p2Score / scoreThreshold);
+        p1TextColor += p1Speed/2f;
+        p1Text.color = pickColor((int)p1TextColor,p1Speed+.1f);
+        p2TextColor += p2Speed/2f;
+        p2Text.color = pickColor((int)p2TextColor,p2Speed+.1f);
+    }
+
+    private Color pickColor(int input,float intensity)
+    {
+        Color output = Color.white;
+        switch (input%5)
         {
-            Shake();
+            case 0:
+            {
+                output = Color.white;
+                break;
+            }
+            case 1:
+            {
+                output = new Color(1f, 0.6f, 0.6f);
+                break;
+            }
+            case 2:
+            {
+                output = Color.yellow;
+                break;
+            }
+            case 3:
+            {
+                output = Color.cyan;
+                break;
+            }
+            case 4:
+            {
+                output = new Color(0.5f, 1f, 0.5f);
+                break;
+            }
         }
-        else
-        {
-            mainCamera.transform.position = cameraHomePosition;
-        }
+        return Color.Lerp(Color.white,output, intensity);
+    }
+
+    private void spawnPowerup()
+    {
         //Decrease powerup countdown timer and spawn a powerup when it reaches 0
         if (powerupCountdown > 0)
         {
@@ -59,15 +112,17 @@ public class Manager : MonoBehaviour
         }
         else if(powerupCountdown==0)
         {
-            spawnPowerup();
+            if (GameObject.FindGameObjectWithTag("PowerUp")==null)
+            {
+                Instantiate(powerup, new Vector3(0f, 5f, 0f), Quaternion.identity);
+            }
+
+            if (GameObject.FindGameObjectWithTag("PowerUp2")==null)
+            {
+                Instantiate(powerup2, new Vector3(0f, -5f, 0f), Quaternion.identity);
+            }
             powerupCountdown = -1;
         }
-    }
-
-    private void spawnPowerup()
-    {
-        Instantiate(powerup, new Vector3(0f, 5f, 0f), Quaternion.identity);
-        Instantiate(powerup2, new Vector3(0f, -5f, 0f), Quaternion.identity);
     }
 
     private void StartRound()
@@ -77,15 +132,30 @@ public class Manager : MonoBehaviour
 
     private void Shake()
     {
-        remainingShakeFrames--;
-        mainCamera.transform.position = cameraHomePosition + UnityEngine.Random.insideUnitSphere * 
-            (shakeIntensity * (float)0.5);
+        float shakeTime = shakeDuration - (Time.time - shakeStartTime);
+        if (shakeTime <= 0f)
+        {
+            mainCamera.transform.position = cameraHomePosition;
+            return;
+        }
+        // Calculate shake intensity based on remaining shake time
+        float currentIntensity = Mathf.Clamp01(shakeTime / shakeDuration);
+        float shakeSpeed = 10;
+        
+        // Calculate shake offset using Perlin noise
+        float offsetX = Mathf.PerlinNoise(Time.time * shakeSpeed, 0f) * 2f - 1f;
+        float offsetY = Mathf.PerlinNoise(0f, Time.time * shakeSpeed) * 2f - 1f;
+        Vector3 shakeOffset = new Vector3(offsetX, offsetY, 0f) * shakeIntensity * currentIntensity;
+
+        // Apply shake offset to camera position
+        mainCamera.transform.position = cameraHomePosition + shakeOffset;
     }
     
     public void TriggerShake(float intensity)
     {
         shakeIntensity = intensity;
-        remainingShakeFrames = (int)(8 * shakeIntensity);
+        shakeDuration = Mathf.Clamp(intensity / 2.5f,0f,1f);
+        shakeStartTime = Time.time;
         Shake();
     }
 
@@ -105,7 +175,7 @@ public class Manager : MonoBehaviour
             newPosition = paddle.transform.position + newPosition * (paddleSpeed * Time.deltaTime);
         }
         //Make sure the paddles stay within bounds and dont go through walls
-        newPosition.y = Math.Clamp(newPosition.y, paddleYMin, paddleYMax);
+        // newPosition.y = Math.Clamp(newPosition.y, paddleYMin, paddleYMax);
         //apply the transformations
         paddle.transform.position = newPosition;
     }
@@ -115,12 +185,14 @@ public class Manager : MonoBehaviour
         if (winner == 1)
         {
             p1Score++;
+            setGuiText(p1Text,p1Score);
             lastWinner = 1;
             Debug.Log("Left Paddle scores!");
         }
         else
         {
             p2Score++;
+            setGuiText(p2Text,p2Score);
             lastWinner = 2;
             Debug.Log("Right Paddle scores!");
         }
@@ -128,7 +200,7 @@ public class Manager : MonoBehaviour
         ball.transform.position = new Vector3(0, 0, 0);
         ball.StartRound(winner);
 
-        if (p1Score >= 11 || p2Score >= 11)
+        if (p1Score >= scoreThreshold || p2Score >= scoreThreshold)
         {
             //Win state!
             if (p1Score > p2Score)
@@ -142,50 +214,16 @@ public class Manager : MonoBehaviour
             Debug.Log("Reseting score...");
             p1Score = 0;
             p2Score = 0;
+            setGuiText(p1Text,0);
+            setGuiText(p2Text,0);
+            p1TextColor = 0;
+            p2TextColor = 0;
         }
         
     }
+
+    private void setGuiText(TextMeshProUGUI gui, int newScore)
+    {
+        gui.text = newScore.ToString();
+    }
 }
-
-/*
- Instructions: 
-https://docs.google.com/document/d/1zvTCqMXNgnaEEgkUyic_q291N7PWWan3RHkbNqSYLak/edit
- 
-https://docs.unity3d.com/Manual/collider-types-interaction.html
-
-Score
-- when balls goes past paddle, player on opposite side increase score by 1
-- max score 99?
-
-Sound
-- ball collides with something
-	- different for paddle or wall
-
-Presentation
-- 2D
-- blocky
-- minimal color (black, white)
-- middle line (visual only)
-- top and bottom lines confine ball as a boundary
-
-Ball
-- speeds up after bounce
-- angle off of paddle is not real-world physics
-- "ball" is square
-- spawns in the middle toward the previous scoring player's side
-- ball returns to original starting velocity upon spawn
-
-Paddle
-- moves vertically
-- constrained by top and bottom boundaries
-- constant velocity/speed
-
-Players
-- single player or 2 player
-
-Goal / Game Rules
-- ba
-
-Dynamics
-- speed of paddles makes predicting trajectories necessary to win / not lose
-*/

@@ -16,6 +16,8 @@ public class Paddle : MonoBehaviour
     private float maxScale = 10f;
 
     public bool activeAI;
+    public float yMax;
+    public float ceiling;
     
     // Start is called before the first frame update
     void Start()
@@ -23,6 +25,8 @@ public class Paddle : MonoBehaviour
         timer = 0;
         speedMultiplier = 1;
         scaleSpeed = 3f;
+        yMax = 12;
+        ceiling = 14.5f;
     }
     
     void FixedUpdate()
@@ -44,6 +48,12 @@ public class Paddle : MonoBehaviour
             }
         }
         timer--;
+        
+        //Make sure the paddles stay within bounds and dont go through walls
+        var position = transform.position;
+        yMax = (ceiling - (transform.localScale.y/2));
+        position = new Vector3(position.x,Math.Clamp(position.y, -yMax, yMax),position.z);
+        transform.position = position;
     }
 
     public void powerUp()

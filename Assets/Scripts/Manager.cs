@@ -17,7 +17,7 @@ public class Manager : MonoBehaviour
     public int p2Score;
     public int lastWinner;//This tracks who the previous winner is,
                           //and should be either 1 for player 1 or 2 for player 2
-                          
+    
     private float shakeDuration;
     private float shakeIntensity;
     private float shakeStartTime;
@@ -28,7 +28,11 @@ public class Manager : MonoBehaviour
     public TextMeshProUGUI p2Text;
     private float p1TextColor;
     private float p2TextColor;
-    private int scoreThreshold = 11;//score needed to win
+    public int scoreThreshold;//score needed to win
+
+    public GameObject background;
+    private Renderer _texture;
+    public Texture[] textures;
     
     private void Start()
     {
@@ -43,6 +47,7 @@ public class Manager : MonoBehaviour
         setGuiText(p2Text,0);
         p1TextColor = 0;
         p2TextColor = 0;
+        _texture = background.GetComponent<Renderer>();
     }
 
     private void FixedUpdate()
@@ -58,6 +63,8 @@ public class Manager : MonoBehaviour
         setTextColors(); //cycle the text colors
         spawnPowerup(); //spawn powerups after a certain time
     }
+    
+    
 
     private void setTextColors()
     {
@@ -199,7 +206,8 @@ public class Manager : MonoBehaviour
         Debug.Log($"Current score: {p1Score} to {p2Score}");
         ball.transform.position = new Vector3(0, 0, 0);
         ball.StartRound(winner);
-
+        _texture.material.mainTexture = textures[(p1Score + p2Score)/3];
+        
         if (p1Score >= scoreThreshold || p2Score >= scoreThreshold)
         {
             //Win state!
@@ -214,12 +222,17 @@ public class Manager : MonoBehaviour
             Debug.Log("Reseting score...");
             p1Score = 0;
             p2Score = 0;
+            _texture.material.mainTexture = textures[0];
             setGuiText(p1Text,0);
             setGuiText(p2Text,0);
             p1TextColor = 0;
             p2TextColor = 0;
         }
-        
+    }
+
+    private void setTexture(int input)
+    {
+        _texture.material.mainTexture = textures[input];
     }
 
     private void setGuiText(TextMeshProUGUI gui, int newScore)

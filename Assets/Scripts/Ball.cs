@@ -58,7 +58,7 @@ public class Ball : MonoBehaviour
             Vector3 ballPosition = transform.position;
             Vector3 paddlePosition = collision.transform.position;
             //clamp the y vector to prevent the ball from going at extreme angles that make it take a long time to cross the field
-            float ydiff = Mathf.Clamp(ballPosition.y - paddlePosition.y,-.8f,.8f);
+            float ydiff = Mathf.Clamp((ballPosition.y - paddlePosition.y)/2f,-.85f,.85f);
             //reverse the x vector and apply the new y vector
             direction = new Vector3(-direction.x,ydiff, direction.z).normalized;
             currentSpeed += speedIncrease;

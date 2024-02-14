@@ -33,6 +33,7 @@ public class Manager : MonoBehaviour
     public GameObject background;
     private Renderer _texture;
     public Texture[] textures;
+    private AudioSource audioSource;
     
     private void Start()
     {
@@ -48,6 +49,7 @@ public class Manager : MonoBehaviour
         p1TextColor = 0;
         p2TextColor = 0;
         _texture = background.GetComponent<Renderer>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void FixedUpdate()
@@ -206,7 +208,7 @@ public class Manager : MonoBehaviour
         Debug.Log($"Current score: {p1Score} to {p2Score}");
         ball.transform.position = new Vector3(0, 0, 0);
         ball.StartRound(winner);
-        _texture.material.mainTexture = textures[(p1Score + p2Score)/3];
+        _texture.material.mainTexture = textures[Math.Clamp((p1Score + p2Score) / 3, 0, textures.Length-1)];
         
         if (p1Score >= scoreThreshold || p2Score >= scoreThreshold)
         {
@@ -219,6 +221,7 @@ public class Manager : MonoBehaviour
             {
                 Debug.Log("Game Over, Right Paddle Wins!");
             }
+            audioSource.Play();
             Debug.Log("Reseting score...");
             p1Score = 0;
             p2Score = 0;
